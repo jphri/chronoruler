@@ -47,6 +47,7 @@ var (
 	commands = map[string]commandFunc {
 		"show": commandShow,
 		"add": commandAdd,
+		"del": commandDel,
 	}
 )
 
@@ -77,6 +78,31 @@ func commandAdd() {
 	}
 
 	actions = append(actions, act)
+	if data, err := json.Marshal(actions); err != nil {
+		log.Fatal(err)
+	} else {
+		if err := os.WriteFile(*flagConfig, data, 0644); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	commandShow()
+}
+
+func commandDel() {
+	args := flag.Args()
+	if len(args) < 2 {
+		fmt.Printf("usage: %s name\n", args[0])
+		return
+	}
+
+	for idx, act := range actions {
+		if act.Name == args[1] {
+			actions = append(actions[0:idx], actions[(idx+1):]...)
+			break
+		}
+	}
+
 	if data, err := json.Marshal(actions); err != nil {
 		log.Fatal(err)
 	} else {
