@@ -20,6 +20,14 @@ type timeAction struct {
 	Ticks tickType `json:"ticks"`
 }
 
+type commandFunc func()
+
+var (
+	actions []timeAction
+	scaleName string
+	scale float32
+)
+
 var (
 	mode = map[string]float32 {
 		"hpy": 24 * 365,
@@ -34,12 +42,35 @@ var (
 
 	flagMode = flag.String("mode", "hpy", "set mode")
 	flagConfig = flag.String("config", "", "config file path")
+
+	commands = map[string]commandFunc {
+		"show": commandShow,
+	}
 )
 
+
+func commandShow() {
+	left := maxTick
+	fmt.Printf("Total: %0.2f %s\n", left.toFloat() * scale, scaleName)
+	for _, a := range actions {
+		fmt.Printf("Action [%s]: %0.2f %s\n", a.Name, a.Ticks.toFloat() * scale, scaleName)
+		left -= a.Ticks
+	}
+	fmt.Printf("Remaining: %0.2f %s\n", left.toFloat() * scale, scaleName)
+}
+
 func main() {
-	var scale float32
-	var scaleName string
-	var actions []timeAction
+	flag.Usage = func() {
+		fmt.Printf("usage: %s [options] <command>\n", os.Args[0]);
+		flag.PrintDefaults()
+
+		fmt.Println("commands:")
+		for commandName := range commands {
+			fmt.Println(" ", commandName)
+		}
+		
+		os.Exit(1)
+	}
 
 	flag.Parse()
 	if s, ok := mode[*flagMode]; !ok {
@@ -55,23 +86,25 @@ func main() {
 		return
 	} else {
 		bytes, err := os.ReadFile(*flagConfig)
-
 		if err != nil {
 			log.Fatal(err)
 			return
 		}
-
 		if err := json.Unmarshal(bytes, &actions); err != nil {
 			log.Fatal(err)
 			return
 		}
 	}
 
-	left := maxTick
-	fmt.Printf("Total: %0.2f %s\n", left.toFloat() * scale, scaleName)
-	for _, a := range actions {
-		fmt.Printf("Action [%s]: %0.2f %s\n", a.Name, a.Ticks.toFloat() * scale, scaleName)
-		left -= a.Ticks
+	args := flag.Args()
+	if len(args) == 0 {
+		flag.Usage()
+		return
 	}
-	fmt.Printf("Remaining: %0.2f %s\n", left.toFloat() * scale, scaleName)
+
+	if f, ok := commands[args[0]]; ok {
+		f()
+	} else {
+		flag.Usage()
+	}
 }
