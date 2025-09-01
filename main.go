@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-type tickType int32
+type tickType int64
 const maxTick tickType = 1 << 24
 
 func (t *tickType) toFloat() float32 {
