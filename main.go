@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 )
 
 type tickType int32
@@ -45,9 +46,9 @@ var (
 
 	commands = map[string]commandFunc {
 		"show": commandShow,
+		"add": commandAdd,
 	}
 )
-
 
 func commandShow() {
 	left := maxTick
@@ -57,6 +58,34 @@ func commandShow() {
 		left -= a.Ticks
 	}
 	fmt.Printf("Remaining: %0.2f %s\n", left.toFloat() * scale, scaleName)
+}
+
+func commandAdd() {
+	args := flag.Args()
+	if len(args) < 3 {
+		fmt.Printf("usage: %s name <time-in-unit>\n", args[0])
+		return
+	}
+
+	act := timeAction{}
+	act.Name = args[1]
+
+	if ticks, err := strconv.ParseFloat(args[2], 32); err != nil {
+		log.Fatal(err)
+	} else {
+		act.Ticks = tickType(ticks * float64(maxTick) / float64(scale))
+	}
+
+	actions = append(actions, act)
+	if data, err := json.Marshal(actions); err != nil {
+		log.Fatal(err)
+	} else {
+		if err := os.WriteFile(*flagConfig, data, 0644); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	commandShow()
 }
 
 func main() {
