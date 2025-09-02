@@ -10,6 +10,7 @@ import (
 )
 
 type tickType int64
+
 const maxTick tickType = 1 << 24
 
 func (t *tickType) toFloat() float32 {
@@ -17,48 +18,48 @@ func (t *tickType) toFloat() float32 {
 }
 
 type timeAction struct {
-	Name string `json:"name"`
+	Name  string   `json:"name"`
 	Ticks tickType `json:"ticks"`
 }
 
 type commandFunc func()
 
 var (
-	actions []timeAction
+	actions   []timeAction
 	scaleName string
-	scale float32
+	scale     float32
 )
 
 var (
-	mode = map[string]float32 {
+	mode = map[string]float32{
 		"hpy": 24 * 365,
 		"mpd": 24 * 60,
 		"hpd": 24,
 	}
 
-	modeName = map[rune]string {
+	modeName = map[rune]string{
 		'h': "hours",
 		'm': "minutes",
 	}
 
-	flagMode = flag.String("mode", "hpy", "set mode")
+	flagMode   = flag.String("mode", "hpy", "set mode")
 	flagConfig = flag.String("config", "", "config file path")
 
-	commands = map[string]commandFunc {
+	commands = map[string]commandFunc{
 		"show": commandShow,
-		"add": commandAdd,
-		"del": commandDel,
+		"add":  commandAdd,
+		"del":  commandDel,
 	}
 )
 
 func commandShow() {
 	left := maxTick
-	fmt.Printf("Total: %0.2f %s\n", left.toFloat() * scale, scaleName)
+	fmt.Printf("Total: %0.2f %s\n", left.toFloat()*scale, scaleName)
 	for _, a := range actions {
-		fmt.Printf("Action [%s]: %0.2f %s\n", a.Name, a.Ticks.toFloat() * scale, scaleName)
+		fmt.Printf("Action [%s]: %0.2f %s\n", a.Name, a.Ticks.toFloat()*scale, scaleName)
 		left -= a.Ticks
 	}
-	fmt.Printf("Remaining: %0.2f %s\n", left.toFloat() * scale, scaleName)
+	fmt.Printf("Remaining: %0.2f %s\n", left.toFloat()*scale, scaleName)
 }
 
 func commandAdd() {
@@ -116,14 +117,14 @@ func commandDel() {
 
 func main() {
 	flag.Usage = func() {
-		fmt.Printf("usage: %s [options] <command>\n", os.Args[0]);
+		fmt.Printf("usage: %s [options] <command>\n", os.Args[0])
 		flag.PrintDefaults()
 
 		fmt.Println("commands:")
 		for commandName := range commands {
 			fmt.Println(" ", commandName)
 		}
-		
+
 		os.Exit(1)
 	}
 
