@@ -10,23 +10,25 @@ import (
 )
 
 var (
-	errUnknownMode = errors.New("unknown mode value")
+	errUnknownUnit = errors.New("unknown unit")
 )
 
 var (
-	mode = map[string]float64{
-		"hpy": float64(Year / time.Hour),
-		"mpd": float64(Day / time.Minute),
-		"hpd": float64(Day / time.Hour),
+	unitsConfig = map[rune]struct{
+		unitName string
+		unitScale time.Duration
+	} {
+		'y': { "year", Year },
+		'M': { "months", Month },
+		'd': { "days", Day },
+		'h': { "hours", time.Hour },
+		'm': { "minutes", time.Minute },
 	}
 
-	modeName = map[rune]string{
-		'h': "hours",
-		'm': "minutes",
-	}
-
-	flagMode   = flag.String("mode", "hpy", "set mode")
 	flagConfig = flag.String("config", "", "config file path")
+
+	flagUnit  = flag.String("unit", "h", "unit used")
+	flagScale = flag.String("scale", "1y", "scale")
 
 	commands = map[string]commandFunc{
 		"show": commandShow,
@@ -36,11 +38,25 @@ var (
 )
 
 func parseFlags() error {
-	if s, ok := mode[*flagMode]; !ok {
-		return errUnknownMode
+	var (
+		scaleTime time.Duration
+		err error
+	)
+
+	if scaleTime, err = ParseDuration(*flagScale); err != nil {
+		return err
+	}
+
+	rFlagUnit := []rune(*flagUnit)
+	if len(rFlagUnit) == 0 {
+		return errUnknownUnit
+	}
+
+	if u, ok := unitsConfig[rFlagUnit[0]]; !ok {
+		return errUnknownUnit
 	} else {
-		scale = s
-		scaleName = modeName[[]rune(*flagMode)[0]]
+		unitName = u.unitName
+		scaleFactor = float64(scaleTime) / float64(u.unitScale)
 	}
 
 	if bytes, err := os.ReadFile(*flagConfig); err != nil {

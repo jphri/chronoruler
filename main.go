@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 )
 
 type tickType int64
@@ -26,18 +27,19 @@ type commandFunc func()
 
 var (
 	actions   []timeAction
-	scaleName string
-	scale     float64
+
+	unitName string = "hours"
+	scaleFactor float64 = float64(Day) / float64(time.Hour) 
 )
 
 func commandShow() {
 	left := maxTick
-	fmt.Printf("Total: %0.2f %s\n", left.toFloat()*scale, scaleName)
+	fmt.Printf("Total: %0.2f %s\n", left.toFloat()*scaleFactor, unitName)
 	for _, a := range actions {
-		fmt.Printf("Action [%s]: %0.2f %s\n", a.Name, a.Ticks.toFloat()*scale, scaleName)
+		fmt.Printf("Action [%s]: %0.2f %s\n", a.Name, a.Ticks.toFloat()*scaleFactor, unitName)
 		left -= a.Ticks
 	}
-	fmt.Printf("Remaining: %0.2f %s\n", left.toFloat()*scale, scaleName)
+	fmt.Printf("Remaining: %0.2f %s\n", left.toFloat()*scaleFactor, unitName)
 }
 
 func commandAdd() {
@@ -53,7 +55,7 @@ func commandAdd() {
 	if ticks, err := strconv.ParseFloat(args[2], 32); err != nil {
 		log.Fatal(err)
 	} else {
-		act.Ticks = tickType(ticks * float64(maxTick) / float64(scale))
+		act.Ticks = tickType(ticks * float64(maxTick) / float64(scaleFactor))
 	}
 
 	actions = append(actions, act)
