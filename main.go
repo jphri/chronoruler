@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 )
 
 type tickType int64
@@ -32,9 +33,9 @@ var (
 
 var (
 	mode = map[string]float64{
-		"hpy": 24 * 365,
-		"mpd": 24 * 60,
-		"hpd": 24,
+		"hpy": float64(Year / time.Hour),
+		"mpd": float64(Day / time.Minute),
+		"hpd": float64(Day / time.Hour),
 	}
 
 	modeName = map[rune]string{
