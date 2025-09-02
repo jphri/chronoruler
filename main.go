@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"time"
 )
 
 type tickType int64
@@ -29,28 +28,6 @@ var (
 	actions   []timeAction
 	scaleName string
 	scale     float64
-)
-
-var (
-	mode = map[string]float64{
-		"hpy": float64(Year / time.Hour),
-		"mpd": float64(Day / time.Minute),
-		"hpd": float64(Day / time.Hour),
-	}
-
-	modeName = map[rune]string{
-		'h': "hours",
-		'm': "minutes",
-	}
-
-	flagMode   = flag.String("mode", "hpy", "set mode")
-	flagConfig = flag.String("config", "", "config file path")
-
-	commands = map[string]commandFunc{
-		"show": commandShow,
-		"add":  commandAdd,
-		"del":  commandDel,
-	}
 )
 
 func commandShow() {
@@ -130,27 +107,10 @@ func main() {
 	}
 
 	flag.Parse()
-	if s, ok := mode[*flagMode]; !ok {
+	if err := parseFlags(); err != nil {
+		fmt.Printf("Error: %v\n", err)
 		flag.Usage()
 		return
-	} else {
-		scale = s
-		scaleName = modeName[[]rune(*flagMode)[0]]
-	}
-
-	if *flagConfig == "" {
-		flag.Usage()
-		return
-	} else {
-		bytes, err := os.ReadFile(*flagConfig)
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-		if err := json.Unmarshal(bytes, &actions); err != nil {
-			log.Fatal(err)
-			return
-		}
 	}
 
 	args := flag.Args()
