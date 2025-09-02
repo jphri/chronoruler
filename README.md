@@ -222,10 +222,15 @@ mesmo projeto em 6 meses (≃ 16 minutos).
 ## Uso
 
 ```
-./chronoruler -config=<arquivo.json> [-mode=<mode>]
-mode:
-    - hpd = horas por dia (hours per day)
-    - hpy = horas por ano (hours per year) (padrão)
-    - mpd = minutos por dia (minutes per day)
+usage: ./chronoruler [options] <command>
+  -config string
+    	config file path
+  -mode string
+    	set mode (default "hpy")
+commands:
+  show
+  add
+  del
+
 ```
 
