@@ -13,8 +13,8 @@ type tickType int64
 
 const maxTick tickType = 1 << 24
 
-func (t *tickType) toFloat() float32 {
-	return float32(*t) / float32(maxTick)
+func (t *tickType) toFloat() float64 {
+	return float64(*t) / float64(maxTick)
 }
 
 type timeAction struct {
@@ -27,11 +27,11 @@ type commandFunc func()
 var (
 	actions   []timeAction
 	scaleName string
-	scale     float32
+	scale     float64
 )
 
 var (
-	mode = map[string]float32{
+	mode = map[string]float64{
 		"hpy": 24 * 365,
 		"mpd": 24 * 60,
 		"hpd": 24,
