@@ -1,7 +1,7 @@
 .PHONY: build
 
 build:
-	go build -o chronoruler main.go
+	go build -o chronoruler .
 
 clean:
 	rm -f chronoruler

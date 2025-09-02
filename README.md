@@ -225,12 +225,13 @@ mesmo projeto em 6 meses (≃ 16 minutos).
 usage: ./chronoruler [options] <command>
   -config string
     	config file path
-  -mode string
-    	set mode (default "hpy")
+  -scale string
+    	scale (default "1y")
+  -unit string
+    	unit used (default "h")
 commands:
+  del
   show
   add
-  del
-
 ```
 
